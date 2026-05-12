@@ -1,6 +1,9 @@
 package com.finance.accountservice.service.impl;
 
+import com.finance.accountservice.dto.request.CreateAccountRequest;
+import com.finance.accountservice.dto.response.AccountResponse;
 import com.finance.accountservice.entity.Account;
+import com.finance.accountservice.mapper.AccountMapper;
 import com.finance.accountservice.repository.AccountRepository;
 import com.finance.accountservice.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -16,28 +19,36 @@ import java.util.UUID;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
+    private final AccountMapper accountMapper;
 
     @Override
     @Transactional  // Allow write (insert, update, delete)
-    public Account createAccount(Account account) {
-        return accountRepository.save(account);
+    public AccountResponse createAccount(CreateAccountRequest request) {
+        Account account = accountMapper.toEntity(request);
+        Account savedAccount = accountRepository.save(account);
+        return accountMapper.toResponse(savedAccount);
     }
 
     @Override
-    public List<Account> getAllAccounts() {
-        return accountRepository.findAll();
+    public List<AccountResponse> getAllAccounts() {
+        return accountRepository.findAll()
+                .stream()
+                .map(accountMapper::toResponse)
+                .toList();
     }
 
     @Override
-    public Account getAccountById(UUID id) {
-        return accountRepository.findById(id)
+    public AccountResponse getAccountById(UUID id) {
+        Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
+        return accountMapper.toResponse(account);
     }
 
     @Override
     @Transactional
     public void deleteAccount(UUID id) {
-        Account account = getAccountById(id);   // Valida que exista
+        Account account = accountRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
         accountRepository.delete(account);
     }
 }

@@ -34,9 +34,6 @@ public class Account {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
     // Metodo que se ejecuta auto antes de insertar
     @PrePersist
     public void prePersist() {
@@ -47,10 +44,5 @@ public class Account {
         if (this.balance == null) {
             this.balance = BigDecimal.ZERO;
         }
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -3,6 +3,7 @@ package com.finance.accountservice.service.impl;
 import com.finance.accountservice.dto.request.CreateAccountRequest;
 import com.finance.accountservice.dto.response.AccountResponse;
 import com.finance.accountservice.entity.Account;
+import com.finance.accountservice.exception.AccountNotFoundException;
 import com.finance.accountservice.mapper.AccountMapper;
 import com.finance.accountservice.repository.AccountRepository;
 import com.finance.accountservice.service.AccountService;
@@ -40,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse getAccountById(UUID id) {
         Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
+                .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
         return accountMapper.toResponse(account);
     }
 
@@ -48,7 +49,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void deleteAccount(UUID id) {
         Account account = accountRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
+                        .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
         accountRepository.delete(account);
     }
 }

@@ -1,5 +1,6 @@
 package com.finance.accountservice.service.impl;
 
+import com.finance.accountservice.dto.common.PageResponse;
 import com.finance.accountservice.dto.request.CreateAccountRequest;
 import com.finance.accountservice.dto.response.AccountResponse;
 import com.finance.accountservice.entity.Account;
@@ -9,6 +10,7 @@ import com.finance.accountservice.repository.AccountRepository;
 import com.finance.accountservice.service.AccountService;
 import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import lombok.RequiredArgsConstructor;
+import com.finance.accountservice.dto.common.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,11 +37,26 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Page<AccountResponse> getAllAccounts(int page, int size) {
-        Pageable pegeable = PageRequest.of(page, size);
+    public PageResponse<AccountResponse> getAllAccounts(int page, int size) {
 
-        return accountRepository.findAll(pegeable)
-                .map(accountMapper::toResponse);
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Account> accountPage = accountRepository.findAll(pageable);
+
+        List<AccountResponse> content = accountPage.getContent()
+                .stream()
+                .map(accountMapper::toResponse)
+                .toList();
+
+        return PageResponse.<AccountResponse>builder()
+                .content(content)
+                .page(accountPage.getNumber())
+                .size(accountPage.getSize())
+                .totalElements(accountPage.getTotalElements())
+                .totalPages(accountPage.getTotalPages())
+                .first(accountPage.isFirst())
+                .last(accountPage.isLast())
+                .build();
     }
 
     @Override

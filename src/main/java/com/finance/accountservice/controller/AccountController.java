@@ -1,5 +1,6 @@
 package com.finance.accountservice.controller;
 
+import com.finance.accountservice.dto.common.PageResponse;
 import com.finance.accountservice.dto.request.CreateAccountRequest;
 import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import com.finance.accountservice.dto.response.AccountResponse;
@@ -8,8 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import java.util.UUID;
 
-import org.apache.coyote.Response;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +32,7 @@ public class AccountController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<AccountResponse>> getAllAccounts(
+    public ResponseEntity<PageResponse<AccountResponse>> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {

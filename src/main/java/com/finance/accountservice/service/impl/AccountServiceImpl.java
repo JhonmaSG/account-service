@@ -7,6 +7,7 @@ import com.finance.accountservice.exception.AccountNotFoundException;
 import com.finance.accountservice.mapper.AccountMapper;
 import com.finance.accountservice.repository.AccountRepository;
 import com.finance.accountservice.service.AccountService;
+import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,5 +52,23 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(id)
                         .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
         accountRepository.delete(account);
+    }
+
+    @Override
+    @Transactional
+    public AccountResponse updateAccount(UUID id, UpdateAccountRequest request) {
+
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() ->
+                        new AccountNotFoundException(
+                                "Account not found with id: " + id
+                        ));
+
+        account.setOwnerName(request.getOwnerName());
+        account.setEmail(request.getEmail());
+        account.setBalance(request.getBalance());
+        account.setStatus(request.getStatus());
+
+        return accountMapper.toResponse(account);
     }
 }

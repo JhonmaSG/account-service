@@ -1,6 +1,7 @@
 package com.finance.accountservice.service;
 
 import com.finance.accountservice.dto.request.CreateAccountRequest;
+import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import com.finance.accountservice.dto.response.AccountResponse;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface AccountService {
     AccountResponse getAccountById(UUID id);
 
     void deleteAccount(UUID id);
+
+    AccountResponse updateAccount(UUID id, UpdateAccountRequest request);
 }

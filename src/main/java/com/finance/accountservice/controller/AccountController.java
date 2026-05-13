@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.UUID;
 
 import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +33,12 @@ public class AccountController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AccountResponse>> getAllAccounts() {
-        return ResponseEntity.ok(accountService.getAllAccounts());
+    public ResponseEntity<Page<AccountResponse>> getAllAccounts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        return ResponseEntity.ok(
+                accountService.getAllAccounts(page, size));
     }
 
     @GetMapping("/{id}")

@@ -9,6 +9,9 @@ import com.finance.accountservice.repository.AccountRepository;
 import com.finance.accountservice.service.AccountService;
 import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,11 +35,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<AccountResponse> getAllAccounts() {
-        return accountRepository.findAll()
-                .stream()
-                .map(accountMapper::toResponse)
-                .toList();
+    public Page<AccountResponse> getAllAccounts(int page, int size) {
+        Pageable pegeable = PageRequest.of(page, size);
+
+        return accountRepository.findAll(pegeable)
+                .map(accountMapper::toResponse);
     }
 
     @Override

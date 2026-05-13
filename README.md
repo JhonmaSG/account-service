@@ -37,11 +37,18 @@ Este proyecto fue desarrollado con el objetivo de aplicar y demostrar conceptos 
 El proyecto sigue una **arquitectura por capas**:
 
 ### Principales patrones aplicados:
+- Layered Architecture
 - Repository Pattern
 - Dependency Injection
-- Separation of Concerns
-- Transacciones con `@Transactional`
-- Uso correcto de `Optional`
+- DTO Pattern
+- Entity Mapping
+- Bean Validation
+- Global Exception Handling
+- Transaction Management
+- RESTful API Design
+- JPA/Hibernate ORM
+- ResponseEntity Usage
+- Clean Code Practices
 
 ## ✨ Funcionalidades Implementadas
 

@@ -15,14 +15,14 @@ import java.math.BigDecimal;
 @Builder
 public class CreateAccountRequest {
 
-    @NotBlank(message = "El nombre del titular es obligatorio")
+    @NotBlank(message = "Owner name is required")
     private String ownerName;
 
-    @NotBlank(message = "El email es obligatorio")
-    @Email(message = "Debe ingresar un email válido")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
     private String email;
 
-    @NotNull(message = "El saldo inicial es obligatorio")
-    @PositiveOrZero(message = "El saldo no puede ser negativo")
+    @NotNull(message = "Balance is required")
+    @PositiveOrZero(message = "Balance must be greater than or equal to zero")
     private BigDecimal balance;
 }

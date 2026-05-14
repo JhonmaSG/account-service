@@ -4,11 +4,13 @@ import com.finance.accountservice.dto.common.PageResponse;
 import com.finance.accountservice.dto.request.CreateAccountRequest;
 import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import com.finance.accountservice.dto.response.AccountResponse;
+import com.finance.accountservice.entity.AccountStatus;
 import com.finance.accountservice.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import java.util.UUID;
 
+import org.apache.coyote.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,10 +36,14 @@ public class AccountController {
     @GetMapping
     public ResponseEntity<PageResponse<AccountResponse>> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) String ownerName,
+            @RequestParam(required = false) AccountStatus status
     ) {
         return ResponseEntity.ok(
-                accountService.getAllAccounts(page, size));
+                accountService.getAllAccounts(page, size, sortBy, direction, ownerName, status));
     }
 
     @GetMapping("/{id}")

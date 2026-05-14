@@ -2,6 +2,8 @@ package com.finance.accountservice.repository;
 
 import com.finance.accountservice.entity.Account;
 import com.finance.accountservice.entity.AccountStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +22,11 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     List<Account> findByStatus(AccountStatus status);
 
     List<Account> findByBalanceGreaterThan(BigDecimal amount);
+
+    Page<Account> findByStatus(AccountStatus status, Pageable pageable);
+
+    Page<Account> findByOwnerNameContainingIgnoreCase(
+            String ownerName,
+            Pageable pageable
+    );
 }

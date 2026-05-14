@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.apache.coyote.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.List;
 public class AccountController {
     private final AccountService accountService;
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
     public ResponseEntity<AccountResponse> CreateAccount(
             @Valid @RequestBody CreateAccountRequest request) {
@@ -33,6 +35,7 @@ public class AccountController {
                 .body(response);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<PageResponse<AccountResponse>> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
@@ -55,6 +58,7 @@ public class AccountController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAccount(
             @PathVariable UUID id) {
@@ -64,6 +68,7 @@ public class AccountController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<AccountResponse> updateAccount(
             @PathVariable UUID id,

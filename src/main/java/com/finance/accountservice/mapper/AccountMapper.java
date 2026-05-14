@@ -3,32 +3,17 @@ package com.finance.accountservice.mapper;
 import com.finance.accountservice.dto.request.CreateAccountRequest;
 import com.finance.accountservice.dto.response.AccountResponse;
 import com.finance.accountservice.entity.Account;
-import com.finance.accountservice.entity.AccountStatus;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-public class AccountMapper {
+@Mapper(componentModel = "spring")
+public interface AccountMapper {
 
-    public Account toEntity(CreateAccountRequest request) {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "status", constant = "ACTIVE")
 
-        return Account.builder()
-                .ownerName(request.getOwnerName())
-                .email(request.getEmail())
-                .balance(request.getBalance())
-                .status(AccountStatus.ACTIVE)
-                .build();
-    }
+    Account toEntity(CreateAccountRequest request);
 
-    public AccountResponse toResponse(Account account) {
-
-        return AccountResponse.builder()
-                .id(account.getId())
-                .ownerName(account.getOwnerName())
-                .email(account.getEmail())
-                .balance(account.getBalance())
-                .status(account.getStatus())
-                .createdAt(account.getCreatedAt())
-                .build();
-    }
-
+    AccountResponse toResponse(Account account);
 }

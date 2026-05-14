@@ -1,4 +1,4 @@
-package com.finance.accountservice.security.dto;
+package com.finance.accountservice.security.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

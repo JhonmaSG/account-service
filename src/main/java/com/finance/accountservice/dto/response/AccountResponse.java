@@ -15,9 +15,11 @@ import java.util.UUID;
 public class AccountResponse {
 
     private UUID id;
-    private String ownerName;
-    private String email;
+    private String accountNumber;
     private BigDecimal balance;
     private AccountStatus status;
     private LocalDateTime createdAt;
+
+    private UUID userId;
+    private String username;
 }

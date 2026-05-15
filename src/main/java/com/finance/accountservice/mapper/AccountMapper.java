@@ -12,8 +12,12 @@ public interface AccountMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "status", constant = "ACTIVE")
-
+    @Mapping(target = "accountNumber", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "balance", source = "initialBalance")
     Account toEntity(CreateAccountRequest request);
 
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "username", source = "user.username")
     AccountResponse toResponse(Account account);
 }

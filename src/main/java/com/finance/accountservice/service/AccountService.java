@@ -17,7 +17,7 @@ public interface AccountService {
             int size,
             String sortBy,
             String direction,
-            String ownerName,
+            String username,
             AccountStatus status
             );
 

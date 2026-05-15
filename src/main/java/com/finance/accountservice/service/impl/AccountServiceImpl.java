@@ -8,6 +8,8 @@ import com.finance.accountservice.entity.AccountStatus;
 import com.finance.accountservice.exception.AccountNotFoundException;
 import com.finance.accountservice.mapper.AccountMapper;
 import com.finance.accountservice.repository.AccountRepository;
+import com.finance.accountservice.security.user.entity.UserEntity;
+import com.finance.accountservice.security.user.repository.UserRepository;
 import com.finance.accountservice.service.AccountService;
 import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +17,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -28,12 +34,29 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;
+    private final UserRepository userRepository;
 
+    @Transactional
     @Override
-    @Transactional  // Allow write (insert, update, delete)
     public AccountResponse createAccount(CreateAccountRequest request) {
-        Account account = accountMapper.toEntity(request);
+
+        UserEntity user = userRepository.findById(request.getUserId())
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        Account account = Account.builder()
+                .accountNumber(generateUniqueAccountNumber())
+                .user(user)
+                .balance(
+                        request.getInitialBalance() != null
+                                ? request.getInitialBalance()
+                                : BigDecimal.ZERO
+                )
+                .status(AccountStatus.ACTIVE)
+                .build();
+
         Account savedAccount = accountRepository.save(account);
+
         return accountMapper.toResponse(savedAccount);
     }
 
@@ -43,7 +66,7 @@ public class AccountServiceImpl implements AccountService {
             int size,
             String sortBy,
             String direction,
-            String ownerName,
+            String username,
             AccountStatus status
     ) {
 
@@ -53,18 +76,26 @@ public class AccountServiceImpl implements AccountService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Account> accountPage;
-        if (status != null) {
 
-            accountPage = accountRepository.findByStatus(status, pageable);
+        if (isAdmin()) {
+            if (status != null) {
 
-        } else if (ownerName != null && !ownerName.isBlank()) {
+                accountPage = accountRepository.findByStatus(status, pageable);
 
+            } else if (username != null && !username.isBlank()) {
+
+                accountPage = accountRepository
+                        .findByUserUsernameContainingIgnoreCase(username, pageable);
+
+            } else {
+
+                accountPage = accountRepository.findAll(pageable);
+            }
+        }
+        else {
+            String currentUsername = getCurrentUsername();
             accountPage = accountRepository
-                    .findByOwnerNameContainingIgnoreCase(ownerName, pageable);
-
-        } else {
-
-            accountPage = accountRepository.findAll(pageable);
+                    .findByUserUsername(currentUsername, pageable);
         }
 
         List<AccountResponse> content = accountPage.getContent()
@@ -85,8 +116,21 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountResponse getAccountById(UUID id) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
+        Account account;
+
+        if(isAdmin()) {
+            account = accountRepository.findById(id)
+                    .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
+        } else {
+            String currentUsername = getCurrentUsername();
+
+            account = accountRepository
+                    .findByIdAndUserUsername(id, currentUsername)
+                    .orElseThrow(() ->
+                            new AccountNotFoundException(
+                                    "Account not found with id: " + id
+                            ));
+        }
         return accountMapper.toResponse(account);
     }
 
@@ -107,12 +151,40 @@ public class AccountServiceImpl implements AccountService {
                         new AccountNotFoundException(
                                 "Account not found with id: " + id
                         ));
-
-        account.setOwnerName(request.getOwnerName());
-        account.setEmail(request.getEmail());
         account.setBalance(request.getBalance());
         account.setStatus(request.getStatus());
 
         return accountMapper.toResponse(account);
+    }
+
+    private String generateUniqueAccountNumber() {
+
+        String accountNumber;
+
+        do {
+            accountNumber = "ACC-" +
+                    UUID.randomUUID()
+                            .toString()
+                            .substring(0, 8)
+                            .toUpperCase();
+
+        } while(accountRepository.existsByAccountNumber(accountNumber));
+
+        return accountNumber;
+    }
+
+    private Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    private String getCurrentUsername() {
+        return getAuthentication().getName();
+    }
+
+    private boolean isAdmin() {
+        return getAuthentication().getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }

@@ -2,8 +2,10 @@ package com.finance.accountservice.transaction.service.impl;
 
 import com.finance.accountservice.dto.common.PageResponse;
 import com.finance.accountservice.entity.Account;
+import com.finance.accountservice.exception.AccessDeniedException;
 import com.finance.accountservice.exception.AccountNotFoundException;
 import com.finance.accountservice.exception.InsufficientBalanceException;
+import com.finance.accountservice.exception.TransactionNotFoundException;
 import com.finance.accountservice.repository.AccountRepository;
 import com.finance.accountservice.transaction.dto.request.CreateTransactionRequest;
 import com.finance.accountservice.transaction.dto.response.TransactionResponse;
@@ -35,27 +37,45 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
 
     @Override
-    public TransactionResponse createTransaction (
-            CreateTransactionRequest request)
-    {
-        Account account = accountRepository.findById(
-                request.getAccountId()
-        )
-        .orElseThrow(() ->
-                new AccountNotFoundException(
-                        "Account not found"
-                ));
+    public TransactionResponse createTransaction(
+            CreateTransactionRequest request
+    ) {
+
+        Account account;
+
+        if (isAdmin()) {
+            account = accountRepository.findById(
+                            request.getAccountId()
+                    )
+                    .orElseThrow(() ->
+                            new AccountNotFoundException(
+                                    "Account not found"
+                            ));
+        } else {
+            account = accountRepository
+                    .findByIdAndUserUsername(
+                            request.getAccountId(),
+                            getCurrentUsername()
+                    )
+                    .orElseThrow(() ->
+                            new AccessDeniedException(
+                                    "Access denied"
+                            ));
+        }
 
         BigDecimal currentBalance = account.getBalance();
 
-        if(request.getType() == TransactionType.DEPOSIT) {
+        if (request.getType() == TransactionType.DEPOSIT) {
             account.setBalance(
-                    currentBalance.add(request.getAmount()
-                    ));
+                    currentBalance.add(request.getAmount())
+            );
 
         } else if (request.getType() == TransactionType.WITHDRAW) {
-            if( currentBalance.compareTo(request.getAmount()) < 0) {
-                throw new InsufficientBalanceException("Insufficient balance");
+            if (currentBalance.compareTo(request.getAmount()) < 0) {
+
+                throw new InsufficientBalanceException(
+                        "Insufficient balance"
+                );
             }
             account.setBalance(
                     currentBalance.subtract(request.getAmount())
@@ -115,7 +135,7 @@ public class TransactionServiceImpl implements TransactionService {
         if ( isAdmin() ) {
             transaction = transactionRepository.findById(id)
                     .orElseThrow(() ->
-                            new RuntimeException("Transaction not found"));
+                            new TransactionNotFoundException("Transaction not found"));
         } else {
             transaction =
                     transactionRepository
@@ -124,7 +144,7 @@ public class TransactionServiceImpl implements TransactionService {
                                     getCurrentUsername()
                             )
                             .orElseThrow(() ->
-                                    new AccountNotFoundException("Transaction not found"));
+                                    new TransactionNotFoundException("Transaction not found"));
         }
         return transactionMapper.toResponse(transaction);
     }

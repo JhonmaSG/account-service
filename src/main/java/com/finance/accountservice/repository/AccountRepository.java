@@ -15,14 +15,6 @@ import java.util.UUID;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, UUID> {
 
-    Optional<Account> findByUserEmail(String email);
-
-    boolean existsByUserEmail(String email);
-
-    List<Account> findByStatus(AccountStatus status);
-
-    List<Account> findByBalanceGreaterThan(BigDecimal amount);
-
     Page<Account> findByStatus(AccountStatus status, Pageable pageable);
 
     Page<Account> findByUserUsernameContainingIgnoreCase(

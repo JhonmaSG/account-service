@@ -122,14 +122,14 @@ El proyecto sigue una arquitectura por capas:
 
 ## 🌐 Endpoints Implementados
 
-| **Módulo**       | **Método & Endpoint** | **Descripción**                   | **Roles / Permisos**                                                                |
-|------------------|-----------------------|-----------------------------------|-------------------------------------------------------------------------------------|
-| **Auth**         | POST `/auth/register` | Registro de usuarios              | Público (sin restricciones)                                                         |
-|                  | POST `/auth/login`    | Autenticación y generación de JWT | Público (sin restricciones)                                                         |
-| **Accounts**     | GET `/accounts`       | Obtiene cuentas paginadas         | **ADMIN** → ve todas las cuentas<br>**USER** → ve únicamente sus cuentas            |
+| **Módulo**       | **Método & Endpoint** | **Descripción**                   | **Roles / Permisos**                                                              |
+|------------------|-----------------------|-----------------------------------|-----------------------------------------------------------------------------------|
+| **Auth**         | POST `/auth/register` | Registro de usuarios              | Público (sin restricciones)                                                       |
+|                  | POST `/auth/login`    | Autenticación y generación de JWT | Público (sin restricciones)                                                       |
+| **Accounts**     | GET `/accounts`       | Obtiene cuentas paginadas         | **ADMIN** → ve todas las cuentas<br>**USER** → ve únicamente sus cuentas          |
 |                  | GET `/accounts/{id}`  | Obtiene una cuenta específica     | **ADMIN** → puede ver cualquier cuenta<br>**USER** → solo puede ver cuentas propias |
-|                  | POST `/accounts`      | Crea una cuenta bancaria          | **Solo ADMIN**                                                                      |
-| **Transactions** | POST `/transactions`  | Crea depósitos o retiros          | **USER → únicamente sobre cuentas propias<br>**ADMIN → acceso completo**            |
+|                  | POST `/accounts`      | Crea una cuenta bancaria          | **Solo ADMIN**                                                                    |
+| **Transactions** | POST `/transactions`  | Crea depósitos o retiros          | **USER** → únicamente sobre cuentas propias<br>**ADMIN** → acceso completo        |
 
 
 ---

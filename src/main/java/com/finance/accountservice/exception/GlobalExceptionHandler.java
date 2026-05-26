@@ -88,13 +88,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(
             AccessDeniedException ex) {
+
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.FORBIDDEN.value())
                 .error(ex.getMessage())
                 .build();
+
         return ResponseEntity
-                .badRequest()
+                .status(HttpStatus.FORBIDDEN)
                 .body(errorResponse);
     }
 
@@ -107,7 +109,7 @@ public class GlobalExceptionHandler {
                 .error(ex.getMessage())
                 .build();
         return ResponseEntity
-                .badRequest()
+                .status(HttpStatus.NOT_FOUND)
                 .body(errorResponse);
     }
 }

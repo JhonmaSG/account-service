@@ -181,25 +181,7 @@ public class TransactionServiceImplTest {
         when(accountRepository.findById(accountId))
                 .thenReturn(Optional.empty());
 
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(
-                        "admin",
-                        null,
-                        List.of(() -> "ROLE_ADMIN")
-                );
-
-        SecurityContext securityContext =
-                mock(SecurityContext.class);
-
-        when(securityContext.getAuthentication())
-                .thenReturn(authentication);
-
-        SecurityContextHolder.setContext(securityContext);
-
-        assertThrows(
-                AccountNotFoundException.class,
-                () -> transactionService.createTransaction(request)
-        );
+        mockAutenticatedUser("admin", "ROLE_ADMIN");
 
         verify(transactionRepository, never())
                 .save(any(Transaction.class));
@@ -222,20 +204,7 @@ public class TransactionServiceImplTest {
                 "paula"
         )).thenReturn(Optional.empty());
 
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(
-                        "paula",
-                        null,
-                        List.of(() -> "ROLE_USER")
-                );
-
-        SecurityContext securityContext =
-                mock(SecurityContext.class);
-
-        when(securityContext.getAuthentication())
-                .thenReturn(authentication);
-
-        SecurityContextHolder.setContext(securityContext);
+        mockAutenticatedUser("paula", "ROLE_USER");
 
         assertThrows(
                 AccessDeniedException.class,
@@ -244,5 +213,21 @@ public class TransactionServiceImplTest {
 
         verify(transactionRepository, never())
                 .save(any(Transaction.class));
+    }
+
+    private void mockAutenticatedUser(String username, String role) {
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(
+                        username,
+                        null,
+                        List.of(() -> role)
+                );
+        SecurityContext securityContext =
+                mock(SecurityContext.class);
+
+        when(securityContext.getAuthentication())
+                .thenReturn(authentication);
+
+        SecurityContextHolder.setContext(securityContext);
     }
 }

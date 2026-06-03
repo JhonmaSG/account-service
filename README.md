@@ -7,6 +7,8 @@ Proyecto enfocado en aplicar conceptos de arquitectura backend empresarial utili
 ![Java](https://img.shields.io/badge/Java-17-blue)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.14-brightgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+![MongoDB](https://img.shields.io/badge/MongoDB-7.0-brightgreen)
+![Docker](https://img.shields.io/badge/Docker-29.2.1-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -24,6 +26,7 @@ Incluye funcionalidades como:
 * Registro de transacciones
 * Validaciones de ownership
 * Seguridad basada en roles
+* Auditoría de eventos con MongoDB
 ---
 
 ## Objetivos del Proyecto
@@ -33,6 +36,7 @@ Incluye funcionalidades como:
 * Dominar Spring Security y JWT
 * Implementar control de acceso por ownership
 * Trabajar con JPA/Hibernate y PostgreSQL
+* Implementar auditoría de eventos con MongoDB
 * Aplicar DTOs y separación de responsabilidades
 * Implementar testing unitario e integración
 * Preparar la evolución hacia microservicios financieros
@@ -48,10 +52,15 @@ Incluye funcionalidades como:
 * **Spring Data JPA**
 * **Hibernate 6**
 * **PostgreSQL**
+* **Spring Data MongoDB**
+* **MongoDB 7.0**
 * **MapStruct**
 * **Lombok**
 * **Maven**
 * **Jakarta Validation**
+
+### Infraestructura
+* **Docker**
 
 ### Testing
 * **JUnit 5**
@@ -87,7 +96,19 @@ El proyecto sigue una arquitectura por capas:
 * Transaction Management
 * RESTful API Design
 * JPA/Hibernate ORM
+* Dual Database (PostgreSQL + MongoDB)
 * Clean Code Practices
+
+---
+
+## Persistencia dual
+
+El proyecto utiliza dos bases de datos con responsabilidades claramente separadas:
+
+| Base de datos | Uso |
+|---|---|
+| **PostgreSQL** | Datos transaccionales: usuarios, cuentas, transacciones |
+| **MongoDB** | Auditoría de eventos: registro de acciones por usuario |
 
 ---
 
@@ -120,32 +141,49 @@ El proyecto sigue una arquitectura por capas:
 * Actualización automática de balance
 * Relación Account → Transaction
 
-## 🌐 Endpoints Implementados
+### Auditoría de Eventos
 
-| **Módulo**       | **Método & Endpoint** | **Descripción**                   | **Roles / Permisos**                                                              |
-|------------------|-----------------------|-----------------------------------|-----------------------------------------------------------------------------------|
-| **Auth**         | POST `/auth/register` | Registro de usuarios              | Público (sin restricciones)                                                       |
-|                  | POST `/auth/login`    | Autenticación y generación de JWT | Público (sin restricciones)                                                       |
-| **Accounts**     | GET `/accounts`       | Obtiene cuentas paginadas         | **ADMIN** → ve todas las cuentas<br>**USER** → ve únicamente sus cuentas          |
-|                  | GET `/accounts/{id}`  | Obtiene una cuenta específica     | **ADMIN** → puede ver cualquier cuenta<br>**USER** → solo puede ver cuentas propias |
-|                  | POST `/accounts`      | Crea una cuenta bancaria          | **Solo ADMIN**                                                                    |
-| **Transactions** | POST `/transactions`  | Crea depósitos o retiros          | **USER** → únicamente sobre cuentas propias<br>**ADMIN** → acceso completo        |
-
+* Registro automático de eventos en MongoDB
+* Eventos auditados: LOGIN, REGISTER, CREATE_ACCOUNT, DELETE_ACCOUNT, DEPOSIT, WITHDRAW
+* Trazabilidad por usuario, entidad afectada y timestamp
+* Consulta de logs exclusiva para ADMIN
 
 ---
 
-## 📚 Estado Actual del Proyecto
+## Endpoints Implementados
 
-Actualmente el proyecto implementa:
+| **Módulo**       | **Método & Endpoint**            | **Descripción**                          | **Roles / Permisos**                                                                |
+|------------------|----------------------------------|------------------------------------------|-------------------------------------------------------------------------------------|
+| **Auth**         | POST `/auth/register`            | Registro de usuarios                     | Público                                                                             |
+|                  | POST `/auth/login`               | Autenticación y generación de JWT        | Público                                                                             |
+| **Accounts**     | GET `/api/accounts`              | Obtiene cuentas paginadas                | **ADMIN** → todas las cuentas<br>**USER** → solo sus cuentas                        |
+|                  | GET `/api/accounts/{id}`         | Obtiene una cuenta específica            | **ADMIN** → cualquier cuenta<br>**USER** → solo cuentas propias                     |
+|                  | POST `/api/accounts`             | Crea una cuenta bancaria                 | Solo **ADMIN**                                                                      |
+|                  | PUT `/api/accounts/{id}`         | Actualiza una cuenta                     | Solo **ADMIN**                                                                      |
+|                  | DELETE `/api/accounts/{id}`      | Elimina una cuenta                       | Solo **ADMIN**                                                                      |
+| **Transactions** | POST `/api/transactions`         | Crea depósitos o retiros                 | **USER** → cuentas propias<br>**ADMIN** → acceso completo                           |
+|                  | GET `/api/transactions`          | Consulta transacciones paginadas         | **ADMIN** → todas<br>**USER** → solo las propias                                    |
+|                  | GET `/api/transactions/{id}`     | Consulta una transacción por ID          | **ADMIN** → cualquiera<br>**USER** → solo las propias                               |
+|                  | GET `/api/transactions/account/{accountId}` | Transacciones por cuenta        | **ADMIN** → cualquier cuenta<br>**USER** → solo cuentas propias                     |
+| **Audit**        | GET `/api/audit/logs`            | Obtiene todos los logs de auditoría      | Solo **ADMIN**                                                                      |
+|                  | GET `/api/audit/logs/user/{username}` | Logs de auditoría por usuario       | Solo **ADMIN**                                                                      |
+|                  | GET `/api/audit/logs/action/{action}` | Logs de auditoría por tipo de acción | Solo **ADMIN**                                                                      |
 
-* JWT Authentication
-* Role-Based Authorization
-* Ownership Authorization
-* CRUD de cuentas
-* Gestión de transacciones
-* DTO Mapping
-* Exception Handling
-* Pagination
-* Integration Testing
-* Security Testing
-* Transaction Validation
+---
+
+## Estado Actual del Proyecto
+
+| Módulo | Estado |
+|---|---|
+| JWT Authentication |  Estable |
+| Role-Based Authorization |  Estable |
+| Ownership Authorization |  Estable |
+| CRUD de cuentas |  Estable |
+| Gestión de transacciones |  Estable |
+| DTO Mapping con MapStruct |  Estable |
+| Exception Handling |  Estable |
+| Pagination |  Estable |
+| Integration Testing |  Estable |
+| Auditoría con MongoDB |  Estable |
+| Docker |  Estable |
+| Docker Compose |  En progreso |

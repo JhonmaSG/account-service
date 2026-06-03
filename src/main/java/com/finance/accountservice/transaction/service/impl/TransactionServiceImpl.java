@@ -14,6 +14,7 @@ import com.finance.accountservice.transaction.entity.TransactionType;
 import com.finance.accountservice.transaction.mapper.TransactionMapper;
 import com.finance.accountservice.transaction.repository.TransactionRepository;
 import com.finance.accountservice.transaction.service.TransactionService;
+import com.finance.accountservice.audit.service.AuditService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final TransactionMapper transactionMapper;
+    private final AuditService auditService;
 
     @Override
     public TransactionResponse createTransaction(
@@ -91,6 +93,15 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedTransaction =
                 transactionRepository.save(transaction);
+
+        auditService.log(
+                request.getType().name(),
+                getCurrentUsername(),
+                "Transaction",
+                savedTransaction.getId().toString(),
+                "Amount: " + request.getAmount() + " | Account: " + account.getAccountNumber(),
+                "SUCCESS"
+        );
 
         return transactionMapper.toResponse(savedTransaction);
     }

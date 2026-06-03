@@ -17,6 +17,11 @@ spring:
       hibernate:
         format_sql: true
 
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: ${MONGO_DB}
+
 server:
   port: 8080
 

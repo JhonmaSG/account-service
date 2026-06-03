@@ -11,6 +11,7 @@ import com.finance.accountservice.repository.AccountRepository;
 import com.finance.accountservice.security.user.entity.UserEntity;
 import com.finance.accountservice.security.user.repository.UserRepository;
 import com.finance.accountservice.service.AccountService;
+import com.finance.accountservice.audit.service.AuditService;
 import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     @Transactional
     @Override
@@ -56,6 +58,15 @@ public class AccountServiceImpl implements AccountService {
                 .build();
 
         Account savedAccount = accountRepository.save(account);
+
+        auditService.log(
+                "CREATE_ACCOUNT",
+                getCurrentUsername(),
+                "Account",
+                savedAccount.getId().toString(),
+                "AccountNumber: " + savedAccount.getAccountNumber(),
+                "SUCCESS"
+        );
 
         return accountMapper.toResponse(savedAccount);
     }
@@ -140,6 +151,15 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(id)
                         .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
         accountRepository.delete(account);
+
+        auditService.log(
+                "DELETE_ACCOUNT",
+                getCurrentUsername(),
+                "Account",
+                id.toString(),
+                "AccountNumber: " + account.getAccountNumber(),
+                "SUCCESS"
+        );
     }
 
     @Override

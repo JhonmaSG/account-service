@@ -7,6 +7,7 @@ import com.finance.accountservice.security.jwt.JwtService;
 import com.finance.accountservice.security.user.entity.Role;
 import com.finance.accountservice.security.user.entity.UserEntity;
 import com.finance.accountservice.security.user.repository.UserRepository;
+import com.finance.accountservice.audit.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final AuditService auditService;
 
     public void register(RegisterRequest request) {
 
@@ -43,6 +45,15 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+
+        auditService.log(
+                "REGISTER",
+                request.getUsername(),
+                "User",
+                null,
+                "New user registered with email: " + request.getEmail(),
+                "SUCCESS"
+        );
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -56,6 +67,15 @@ public class AuthService {
 
         String token = jwtService.generateToken(
                 request.getUsername()
+        );
+
+        auditService.log(
+                "LOGIN",
+                request.getUsername(),
+                "User",
+                null,
+                "Successful login",
+                "SUCCESS"
         );
 
         return new LoginResponse(token);

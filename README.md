@@ -186,4 +186,4 @@ El proyecto utiliza dos bases de datos con responsabilidades claramente separada
 | Integration Testing |  Estable |
 | Auditoría con MongoDB |  Estable |
 | Docker |  Estable |
-| Docker Compose |  En progreso |
+| Docker Compose |  En Estable |

@@ -1,0 +1,63 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: ${CONTAINER_NAME_POSTGRES}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7.0
+    container_name: ${CONTAINER_NAME_MONGO}
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INIT_DB_DATABASE}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD","mongosh","--eval","db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_NAME_APP}
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      MONGO_URI: ${MONGO_URI}
+      MONGO_DB: ${MONGO_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_FIRST_NAME: ${ADMIN_FIRST_NAME}
+      ADMIN_LAST_NAME: ${ADMIN_LAST_NAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  mongo_data:

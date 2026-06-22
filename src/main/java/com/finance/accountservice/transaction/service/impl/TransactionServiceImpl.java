@@ -7,6 +7,7 @@ import com.finance.accountservice.exception.AccountNotFoundException;
 import com.finance.accountservice.exception.InsufficientBalanceException;
 import com.finance.accountservice.exception.TransactionNotFoundException;
 import com.finance.accountservice.repository.AccountRepository;
+import com.finance.accountservice.security.currentuser.CurrentUserService;
 import com.finance.accountservice.transaction.dto.request.CreateTransactionRequest;
 import com.finance.accountservice.transaction.dto.response.TransactionResponse;
 import com.finance.accountservice.transaction.entity.Transaction;
@@ -37,6 +38,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final AccountRepository accountRepository;
     private final TransactionMapper transactionMapper;
     private final AuditService auditService;
+    private final CurrentUserService currentUserService;
 
     @Override
     public TransactionResponse createTransaction(
@@ -45,7 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Account account;
 
-        if (isAdmin()) {
+        if (currentUserService.isAdmin()) {
             account = accountRepository.findById(
                             request.getAccountId()
                     )
@@ -57,7 +59,7 @@ public class TransactionServiceImpl implements TransactionService {
             account = accountRepository
                     .findByIdAndUserUsername(
                             request.getAccountId(),
-                            getCurrentUsername()
+                            currentUserService.getUserName()
                     )
                     .orElseThrow(() ->
                             new AccessDeniedException(
@@ -96,7 +98,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         auditService.log(
                 request.getType().name(),
-                getCurrentUsername(),
+                currentUserService.getUserName(),
                 "Transaction",
                 savedTransaction.getId().toString(),
                 "Amount: " + request.getAmount() + " | Account: " + account.getAccountNumber(),
@@ -115,11 +117,11 @@ public class TransactionServiceImpl implements TransactionService {
 
         Page<Transaction> transactionPage;
 
-        if( isAdmin() ) {
+        if( currentUserService.isAdmin() ) {
             transactionPage = transactionRepository.findAll(pageable);
         } else {
             transactionPage = transactionRepository.findByAccountUserUsername(
-                    getCurrentUsername(),
+                    currentUserService.getUserName(),
                     pageable
             );
         }
@@ -143,7 +145,7 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionResponse getTransactionById(UUID id) {
         Transaction transaction;
 
-        if ( isAdmin() ) {
+        if ( currentUserService.isAdmin() ) {
             transaction = transactionRepository.findById(id)
                     .orElseThrow(() ->
                             new TransactionNotFoundException("Transaction not found"));
@@ -152,7 +154,7 @@ public class TransactionServiceImpl implements TransactionService {
                     transactionRepository
                             .findByIdAndAccountUserUsername(
                                     id,
-                                    getCurrentUsername()
+                                    currentUserService.getUserName()
                             )
                             .orElseThrow(() ->
                                     new TransactionNotFoundException("Transaction not found"));
@@ -170,7 +172,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Page<Transaction> transactionPage;
 
-        if ( isAdmin() ) {
+        if ( currentUserService.isAdmin() ) {
             transactionPage =
                     transactionRepository.findByAccountId(
                             accountId,
@@ -180,7 +182,7 @@ public class TransactionServiceImpl implements TransactionService {
             transactionPage =
                     transactionRepository.findByAccountIdAndAccountUserUsername(
                             accountId,
-                            getCurrentUsername(),
+                            currentUserService.getUserName(),
                             pageable
                     );
         }
@@ -200,20 +202,5 @@ public class TransactionServiceImpl implements TransactionService {
                 .first(transactionPage.isFirst())
                 .last(transactionPage.isLast())
                 .build();
-    }
-
-    private Authentication getAuthentication() {
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
-
-    private String getCurrentUsername() {
-        return getAuthentication().getName();
-    }
-
-    private boolean isAdmin() {
-        return getAuthentication().getAuthorities()
-                .stream()
-                .anyMatch(authority ->
-                        authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }

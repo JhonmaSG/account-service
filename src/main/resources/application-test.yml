@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  data:
+    mongodb:
+      auto-index-creation: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+jwt:
+  secret: ${JWT_SECRET:test-secret-key-for-jwt-token-minimum-32-characters}

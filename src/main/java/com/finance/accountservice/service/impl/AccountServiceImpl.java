@@ -8,6 +8,7 @@ import com.finance.accountservice.entity.AccountStatus;
 import com.finance.accountservice.exception.AccountNotFoundException;
 import com.finance.accountservice.mapper.AccountMapper;
 import com.finance.accountservice.repository.AccountRepository;
+import com.finance.accountservice.security.currentuser.CurrentUserService;
 import com.finance.accountservice.security.user.entity.UserEntity;
 import com.finance.accountservice.security.user.repository.UserRepository;
 import com.finance.accountservice.service.AccountService;
@@ -18,15 +19,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +36,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
     private final UserRepository userRepository;
     private final AuditService auditService;
+    private final CurrentUserService currentUserService;
 
     @Transactional
     @Override
@@ -61,7 +61,7 @@ public class AccountServiceImpl implements AccountService {
 
         auditService.log(
                 "CREATE_ACCOUNT",
-                getCurrentUsername(),
+                currentUserService.getCurrentUsername(),
                 "Account",
                 savedAccount.getId().toString(),
                 "AccountNumber: " + savedAccount.getAccountNumber(),
@@ -88,7 +88,7 @@ public class AccountServiceImpl implements AccountService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Account> accountPage;
 
-        if (isAdmin()) {
+        if (currentUserService.isAdmin()) {
             if (status != null) {
 
                 accountPage = accountRepository.findByStatus(status, pageable);
@@ -104,7 +104,7 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         else {
-            String currentUsername = getCurrentUsername();
+            String currentUsername = currentUserService.getCurrentUsername();
             accountPage = accountRepository
                     .findByUserUsername(currentUsername, pageable);
         }
@@ -129,11 +129,11 @@ public class AccountServiceImpl implements AccountService {
     public AccountResponse getAccountById(UUID id) {
         Account account;
 
-        if(isAdmin()) {
+        if(currentUserService.isAdmin()) {
             account = accountRepository.findById(id)
                     .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
         } else {
-            String currentUsername = getCurrentUsername();
+            String currentUsername = currentUserService.getCurrentUsername();
 
             account = accountRepository
                     .findByIdAndUserUsername(id, currentUsername)
@@ -154,7 +154,7 @@ public class AccountServiceImpl implements AccountService {
 
         auditService.log(
                 "DELETE_ACCOUNT",
-                getCurrentUsername(),
+                currentUserService.getCurrentUsername(),
                 "Account",
                 id.toString(),
                 "AccountNumber: " + account.getAccountNumber(),
@@ -191,20 +191,5 @@ public class AccountServiceImpl implements AccountService {
         } while(accountRepository.existsByAccountNumber(accountNumber));
 
         return accountNumber;
-    }
-
-    private Authentication getAuthentication() {
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
-
-    private String getCurrentUsername() {
-        return getAuthentication().getName();
-    }
-
-    private boolean isAdmin() {
-        return getAuthentication().getAuthorities()
-                .stream()
-                .anyMatch(authority ->
-                        authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }

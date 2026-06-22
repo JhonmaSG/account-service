@@ -2,28 +2,5 @@ spring:
   application:
     name: account-service
 
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-
-    properties:
-      hibernate:
-        format_sql: true
-
-  data:
-    mongodb:
-      uri: ${MONGO_URI}
-      database: ${MONGO_DB}
-
 server:
   port: 8080
-
-jwt:
-  secret: ${JWT_SECRET}

@@ -5,12 +5,14 @@ import com.finance.accountservice.security.user.entity.UserEntity;
 import com.finance.accountservice.security.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
+@Profile("!test")
 public class AdminSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;

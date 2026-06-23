@@ -21,8 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -59,7 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
             account = accountRepository
                     .findByIdAndUserUsername(
                             request.getAccountId(),
-                            currentUserService.getUserName()
+                            currentUserService.getCurrentUsername()
                     )
                     .orElseThrow(() ->
                             new AccessDeniedException(
@@ -98,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         auditService.log(
                 request.getType().name(),
-                currentUserService.getUserName(),
+                currentUserService.getCurrentUsername(),
                 "Transaction",
                 savedTransaction.getId().toString(),
                 "Amount: " + request.getAmount() + " | Account: " + account.getAccountNumber(),
@@ -121,7 +119,7 @@ public class TransactionServiceImpl implements TransactionService {
             transactionPage = transactionRepository.findAll(pageable);
         } else {
             transactionPage = transactionRepository.findByAccountUserUsername(
-                    currentUserService.getUserName(),
+                    currentUserService.getCurrentUsername(),
                     pageable
             );
         }
@@ -154,7 +152,7 @@ public class TransactionServiceImpl implements TransactionService {
                     transactionRepository
                             .findByIdAndAccountUserUsername(
                                     id,
-                                    currentUserService.getUserName()
+                                    currentUserService.getCurrentUsername()
                             )
                             .orElseThrow(() ->
                                     new TransactionNotFoundException("Transaction not found"));
@@ -182,7 +180,7 @@ public class TransactionServiceImpl implements TransactionService {
             transactionPage =
                     transactionRepository.findByAccountIdAndAccountUserUsername(
                             accountId,
-                            currentUserService.getUserName(),
+                            currentUserService.getCurrentUsername(),
                             pageable
                     );
         }

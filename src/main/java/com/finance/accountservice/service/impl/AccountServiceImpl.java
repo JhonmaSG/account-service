@@ -8,6 +8,8 @@ import com.finance.accountservice.entity.AccountStatus;
 import com.finance.accountservice.exception.AccountNotFoundException;
 import com.finance.accountservice.mapper.AccountMapper;
 import com.finance.accountservice.repository.AccountRepository;
+import com.finance.accountservice.security.authorization.AccountAuthorizationService;
+import com.finance.accountservice.security.authorization.impl.AccountAuthorizationServiceImpl;
 import com.finance.accountservice.security.currentuser.CurrentUserService;
 import com.finance.accountservice.security.user.entity.UserEntity;
 import com.finance.accountservice.security.user.repository.UserRepository;
@@ -37,6 +39,7 @@ public class AccountServiceImpl implements AccountService {
     private final UserRepository userRepository;
     private final AuditService auditService;
     private final CurrentUserService currentUserService;
+    private final AccountAuthorizationService accountAuthorizationService;
 
     @Transactional
     @Override
@@ -86,28 +89,12 @@ public class AccountServiceImpl implements AccountService {
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Account> accountPage;
-
-        if (currentUserService.isAdmin()) {
-            if (status != null) {
-
-                accountPage = accountRepository.findByStatus(status, pageable);
-
-            } else if (username != null && !username.isBlank()) {
-
-                accountPage = accountRepository
-                        .findByUserUsernameContainingIgnoreCase(username, pageable);
-
-            } else {
-
-                accountPage = accountRepository.findAll(pageable);
-            }
-        }
-        else {
-            String currentUsername = currentUserService.getCurrentUsername();
-            accountPage = accountRepository
-                    .findByUserUsername(currentUsername, pageable);
-        }
+        Page<Account> accountPage =
+                accountAuthorizationService.getAccessibleAccounts(
+                        pageable,
+                        username,
+                        status
+                );
 
         List<AccountResponse> content = accountPage.getContent()
                 .stream()
@@ -127,30 +114,17 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountResponse getAccountById(UUID id) {
-        Account account;
 
-        if(currentUserService.isAdmin()) {
-            account = accountRepository.findById(id)
-                    .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
-        } else {
-            String currentUsername = currentUserService.getCurrentUsername();
+        Account account = accountAuthorizationService.getAccessibleAccount(id);
 
-            account = accountRepository
-                    .findByIdAndUserUsername(id, currentUsername)
-                    .orElseThrow(() ->
-                            new AccountNotFoundException(
-                                    "Account not found with id: " + id
-                            ));
-        }
         return accountMapper.toResponse(account);
     }
 
     @Override
     @Transactional
     public void deleteAccount(UUID id) {
-        Account account = accountRepository.findById(id)
-                        .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
-        accountRepository.delete(account);
+
+        Account account = accountAuthorizationService.getAccessibleAccount(id);
 
         auditService.log(
                 "DELETE_ACCOUNT",
@@ -166,11 +140,8 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public AccountResponse updateAccount(UUID id, UpdateAccountRequest request) {
 
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() ->
-                        new AccountNotFoundException(
-                                "Account not found with id: " + id
-                        ));
+        Account account = accountAuthorizationService.getAccessibleAccount(id);
+
         account.setBalance(request.getBalance());
         account.setStatus(request.getStatus());
 

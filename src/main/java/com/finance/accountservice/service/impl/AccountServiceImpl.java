@@ -5,11 +5,10 @@ import com.finance.accountservice.dto.request.CreateAccountRequest;
 import com.finance.accountservice.dto.response.AccountResponse;
 import com.finance.accountservice.entity.Account;
 import com.finance.accountservice.entity.AccountStatus;
-import com.finance.accountservice.exception.AccountNotFoundException;
+import com.finance.accountservice.exception.UserNotFoundException;
 import com.finance.accountservice.mapper.AccountMapper;
 import com.finance.accountservice.repository.AccountRepository;
 import com.finance.accountservice.security.authorization.AccountAuthorizationService;
-import com.finance.accountservice.security.authorization.impl.AccountAuthorizationServiceImpl;
 import com.finance.accountservice.security.currentuser.CurrentUserService;
 import com.finance.accountservice.security.user.entity.UserEntity;
 import com.finance.accountservice.security.user.repository.UserRepository;
@@ -47,7 +46,7 @@ public class AccountServiceImpl implements AccountService {
 
         UserEntity user = userRepository.findById(request.getUserId())
                 .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                        new UserNotFoundException("User not found"));
 
         Account account = Account.builder()
                 .accountNumber(generateUniqueAccountNumber())
@@ -125,6 +124,8 @@ public class AccountServiceImpl implements AccountService {
     public void deleteAccount(UUID id) {
 
         Account account = accountAuthorizationService.getAccessibleAccount(id);
+
+        accountRepository.delete(account);
 
         auditService.log(
                 "DELETE_ACCOUNT",

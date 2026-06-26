@@ -5,6 +5,12 @@ spring:
     username: sa
     password:
 
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/finance_audit_test
+      database: finance_audit_test
+      auto-index-creation: false
+
   jpa:
     hibernate:
       ddl-auto: create-drop

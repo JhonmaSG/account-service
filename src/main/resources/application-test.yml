@@ -7,6 +7,8 @@ spring:
 
   data:
     mongodb:
+      uri: ${MONGO_URI_TEST}
+      database: ${MONGO_DB_TEST}
       auto-index-creation: false
 
   jpa:
@@ -14,4 +16,4 @@ spring:
       ddl-auto: create-drop
 
 jwt:
-  secret: ${JWT_SECRET:test-secret-key-for-jwt-token-minimum-32-characters}
+  secret: ${JWT_SECRET}

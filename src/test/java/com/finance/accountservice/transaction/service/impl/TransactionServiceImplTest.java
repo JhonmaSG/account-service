@@ -1,10 +1,12 @@
 package com.finance.accountservice.transaction.service.impl;
 
 import com.finance.accountservice.entity.Account;
+import com.finance.accountservice.audit.service.AuditService;
 import com.finance.accountservice.exception.AccessDeniedException;
 import com.finance.accountservice.exception.AccountNotFoundException;
 import com.finance.accountservice.exception.InsufficientBalanceException;
 import com.finance.accountservice.repository.AccountRepository;
+import com.finance.accountservice.security.currentuser.CurrentUserService;
 import com.finance.accountservice.transaction.dto.request.CreateTransactionRequest;
 import com.finance.accountservice.transaction.dto.response.TransactionResponse;
 import com.finance.accountservice.transaction.entity.Transaction;
@@ -16,12 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,6 +45,12 @@ public class TransactionServiceImplTest {
     @Mock
     private TransactionMapper transactionMapper;
 
+    @Mock
+    private AuditService auditService;
+
+    @Mock
+    private CurrentUserService currentUserService;
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
@@ -70,9 +73,16 @@ public class TransactionServiceImplTest {
         when(accountRepository.findById(accountId))
                 .thenReturn(Optional.of(account));
 
+        when(currentUserService.isAdmin())
+                .thenReturn(true);
+
+        when(currentUserService.getCurrentUsername())
+                .thenReturn("admin");
+
 
 
         Transaction transaction = Transaction.builder()
+                .id(UUID.randomUUID())
                 .amount(BigDecimal.valueOf(50000))
                 .type(TransactionType.DEPOSIT)
                 .account(account)
@@ -88,19 +98,6 @@ public class TransactionServiceImplTest {
                         .build();
         when(transactionMapper.toResponse(transaction))
                 .thenReturn(response);
-
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(
-                        "admin",
-                        null,
-                        List.of(() -> "ROLE_ADMIN")
-                );
-        SecurityContext securityContext =
-                mock(SecurityContext.class);
-        when(securityContext.getAuthentication())
-                .thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
 
         TransactionResponse result =
                 transactionService.createTransaction(request);
@@ -118,6 +115,16 @@ public class TransactionServiceImplTest {
 
         verify(transactionRepository, times(1))
                 .save(any(Transaction.class));
+
+        verify(auditService)
+                .log(
+                        eq("DEPOSIT"),
+                        eq("admin"),
+                        eq("Transaction"),
+                        anyString(),
+                        anyString(),
+                        eq("SUCCESS")
+                );
     }
 
     @Test
@@ -141,20 +148,8 @@ public class TransactionServiceImplTest {
         when(accountRepository.findById(accountId))
                 .thenReturn(Optional.of(account));
 
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(
-                        "admin",
-                        null,
-                        List.of(() -> "ROLE_ADMIN")
-                );
-
-        SecurityContext securityContext =
-                mock(SecurityContext.class);
-
-        when(securityContext.getAuthentication())
-                .thenReturn(authentication);
-
-        SecurityContextHolder.setContext(securityContext);
+        when(currentUserService.isAdmin())
+                .thenReturn(true);
 
         assertThrows(
                 InsufficientBalanceException.class,
@@ -178,10 +173,16 @@ public class TransactionServiceImplTest {
         request.setAmount(BigDecimal.valueOf(10000));
         request.setDescription("Ingreso");
 
+        when(currentUserService.isAdmin())
+                .thenReturn(true);
+
         when(accountRepository.findById(accountId))
                 .thenReturn(Optional.empty());
 
-        mockAutenticatedUser("admin", "ROLE_ADMIN");
+        assertThrows(
+                AccountNotFoundException.class,
+                () -> transactionService.createTransaction(request)
+        );
 
         verify(transactionRepository, never())
                 .save(any(Transaction.class));
@@ -199,12 +200,16 @@ public class TransactionServiceImplTest {
         request.setAmount(BigDecimal.valueOf(10000));
         request.setDescription("Ingreso");
 
+        when(currentUserService.isAdmin())
+                .thenReturn(false);
+
+        when(currentUserService.getCurrentUsername())
+                .thenReturn("paula");
+
         when(accountRepository.findByIdAndUserUsername(
                 accountId,
                 "paula"
         )).thenReturn(Optional.empty());
-
-        mockAutenticatedUser("paula", "ROLE_USER");
 
         assertThrows(
                 AccessDeniedException.class,
@@ -213,21 +218,5 @@ public class TransactionServiceImplTest {
 
         verify(transactionRepository, never())
                 .save(any(Transaction.class));
-    }
-
-    private void mockAutenticatedUser(String username, String role) {
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(
-                        username,
-                        null,
-                        List.of(() -> role)
-                );
-        SecurityContext securityContext =
-                mock(SecurityContext.class);
-
-        when(securityContext.getAuthentication())
-                .thenReturn(authentication);
-
-        SecurityContextHolder.setContext(securityContext);
     }
 }

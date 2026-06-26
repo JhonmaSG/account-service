@@ -2,6 +2,7 @@ package com.finance.accountservice.transaction.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.finance.accountservice.audit.service.AuditService;
 import com.finance.accountservice.entity.Account;
 import com.finance.accountservice.entity.AccountStatus;
 import com.finance.accountservice.repository.AccountRepository;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -51,6 +53,9 @@ class TransactionIntegrationTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @MockitoBean
+    private AuditService auditService;
 
     private String token;
     private Account account;

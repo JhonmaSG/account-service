@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * CommandLineRunner that creates a default ADMIN user on startup
+ * if one does not already exist. Reads credentials from environment
+ * variables. Disabled during test profiles.
+ */
 @Component
 @Profile("!test")
 public class AdminSeeder implements CommandLineRunner {

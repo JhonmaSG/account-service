@@ -6,27 +6,31 @@ import com.finance.accountservice.dto.request.UpdateAccountRequest;
 import com.finance.accountservice.dto.response.AccountResponse;
 import com.finance.accountservice.entity.AccountStatus;
 import com.finance.accountservice.service.AccountService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import java.util.UUID;
-
-import org.apache.coyote.Request;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.UUID;
 
+@Tag(name = "Accounts", description = "Endpoints for managing bank accounts")
 @RestController
 @RequestMapping("/accounts")
 @RequiredArgsConstructor
 public class AccountController {
     private final AccountService accountService;
 
+    @Operation(summary = "Create an account", description = "Creates a new bank account. ADMIN only.")
+    @ApiResponse(responseCode = "201", description = "Account created successfully")
+    @ApiResponse(responseCode = "403", description = "Access denied")
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<AccountResponse> CreateAccount(
+    public ResponseEntity<AccountResponse> createAccount(
             @Valid @RequestBody CreateAccountRequest request) {
 
         AccountResponse response = accountService.createAccount(request);
@@ -35,6 +39,8 @@ public class AccountController {
                 .body(response);
     }
 
+    @Operation(summary = "List accounts", description = "Returns paginated accounts. ADMIN sees all, USER sees own.")
+    @ApiResponse(responseCode = "200", description = "Accounts retrieved successfully")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping
     public ResponseEntity<PageResponse<AccountResponse>> getAllAccounts(
@@ -49,6 +55,9 @@ public class AccountController {
                 accountService.getAllAccounts(page, size, sortBy, direction, ownerName, status));
     }
 
+    @Operation(summary = "Get account by ID", description = "Returns a single account. ADMIN sees any, USER sees own.")
+    @ApiResponse(responseCode = "200", description = "Account found")
+    @ApiResponse(responseCode = "404", description = "Account not found")
     @GetMapping("/{id}")
     public ResponseEntity<AccountResponse> getAccountById(
             @PathVariable UUID id) {
@@ -58,6 +67,9 @@ public class AccountController {
         );
     }
 
+    @Operation(summary = "Delete an account", description = "Deletes an account by ID. ADMIN only.")
+    @ApiResponse(responseCode = "204", description = "Account deleted")
+    @ApiResponse(responseCode = "403", description = "Access denied")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAccount(
@@ -68,6 +80,10 @@ public class AccountController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update an account", description = "Updates an existing account. ADMIN only.")
+    @ApiResponse(responseCode = "200", description = "Account updated successfully")
+    @ApiResponse(responseCode = "403", description = "Access denied")
+    @ApiResponse(responseCode = "404", description = "Account not found")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<AccountResponse> updateAccount(

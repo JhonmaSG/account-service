@@ -11,6 +11,11 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Global exception handler for REST controllers. Maps domain exceptions
+ * (AccountNotFoundException, InsufficientBalanceException, etc.) to
+ * appropriate HTTP responses with a consistent error structure.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

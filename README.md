@@ -156,18 +156,18 @@ El proyecto utiliza dos bases de datos con responsabilidades claramente separada
 |------------------|----------------------------------|------------------------------------------|-------------------------------------------------------------------------------------|
 | **Auth**         | POST `/auth/register`            | Registro de usuarios                     | Público                                                                             |
 |                  | POST `/auth/login`               | Autenticación y generación de JWT        | Público                                                                             |
-| **Accounts**     | GET `/api/accounts`              | Obtiene cuentas paginadas                | **ADMIN** → todas las cuentas<br>**USER** → solo sus cuentas                        |
-|                  | GET `/api/accounts/{id}`         | Obtiene una cuenta específica            | **ADMIN** → cualquier cuenta<br>**USER** → solo cuentas propias                     |
-|                  | POST `/api/accounts`             | Crea una cuenta bancaria                 | Solo **ADMIN**                                                                      |
-|                  | PUT `/api/accounts/{id}`         | Actualiza una cuenta                     | Solo **ADMIN**                                                                      |
-|                  | DELETE `/api/accounts/{id}`      | Elimina una cuenta                       | Solo **ADMIN**                                                                      |
-| **Transactions** | POST `/api/transactions`         | Crea depósitos o retiros                 | **USER** → cuentas propias<br>**ADMIN** → acceso completo                           |
-|                  | GET `/api/transactions`          | Consulta transacciones paginadas         | **ADMIN** → todas<br>**USER** → solo las propias                                    |
-|                  | GET `/api/transactions/{id}`     | Consulta una transacción por ID          | **ADMIN** → cualquiera<br>**USER** → solo las propias                               |
-|                  | GET `/api/transactions/account/{accountId}` | Transacciones por cuenta        | **ADMIN** → cualquier cuenta<br>**USER** → solo cuentas propias                     |
-| **Audit**        | GET `/api/audit/logs`            | Obtiene todos los logs de auditoría      | Solo **ADMIN**                                                                      |
-|                  | GET `/api/audit/logs/user/{username}` | Logs de auditoría por usuario       | Solo **ADMIN**                                                                      |
-|                  | GET `/api/audit/logs/action/{action}` | Logs de auditoría por tipo de acción | Solo **ADMIN**                                                                      |
+| **Accounts**     | GET `/accounts`                   | Obtiene cuentas paginadas                | **ADMIN** → todas las cuentas<br>**USER** → solo sus cuentas                        |
+|                  | GET `/accounts/{id}`             | Obtiene una cuenta específica            | **ADMIN** → cualquier cuenta<br>**USER** → solo cuentas propias                     |
+|                  | POST `/accounts`                 | Crea una cuenta bancaria                 | Solo **ADMIN**                                                                      |
+|                  | PUT `/accounts/{id}`             | Actualiza una cuenta                     | Solo **ADMIN**                                                                      |
+|                  | DELETE `/accounts/{id}`          | Elimina una cuenta                       | Solo **ADMIN**                                                                      |
+| **Transactions** | POST `/transactions`             | Crea depósitos o retiros                 | **USER** → cuentas propias<br>**ADMIN** → acceso completo                           |
+|                  | GET `/transactions`              | Consulta transacciones paginadas         | **ADMIN** → todas<br>**USER** → solo las propias                                    |
+|                  | GET `/transactions/{id}`         | Consulta una transacción por ID          | **ADMIN** → cualquiera<br>**USER** → solo las propias                               |
+|                  | GET `/transactions/account/{accountId}` | Transacciones por cuenta        | **ADMIN** → cualquier cuenta<br>**USER** → solo cuentas propias                     |
+| **Audit**        | GET `/audit/logs`                | Obtiene todos los logs de auditoría      | Solo **ADMIN**                                                                      |
+|                  | GET `/audit/logs/user/{username}` | Logs de auditoría por usuario            | Solo **ADMIN**                                                                      |
+|                  | GET `/audit/logs/action/{action}` | Logs de auditoría por tipo de acción     | Solo **ADMIN**                                                                      |
 
 ---
 

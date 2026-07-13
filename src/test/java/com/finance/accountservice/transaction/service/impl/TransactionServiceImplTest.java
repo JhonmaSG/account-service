@@ -134,8 +134,6 @@ public class TransactionServiceImplTest {
         CreateTransactionRequest request =
                 new CreateTransactionRequest();
         request.setAccountId(accountId);
-
-        request.setAccountId(accountId);
         request.setType(TransactionType.WITHDRAW);
         request.setAmount(BigDecimal.valueOf(50000));
         request.setDescription("Retiro");
@@ -166,8 +164,6 @@ public class TransactionServiceImplTest {
 
         CreateTransactionRequest request =
                 new CreateTransactionRequest();
-        request.setAccountId(accountId);
-
         request.setAccountId(accountId);
         request.setType(TransactionType.DEPOSIT);
         request.setAmount(BigDecimal.valueOf(10000));

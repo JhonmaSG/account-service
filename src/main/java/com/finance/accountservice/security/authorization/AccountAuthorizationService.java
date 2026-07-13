@@ -7,6 +7,11 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
+/**
+ * Service interface for ownership-based authorization on accounts.
+ * Provides methods to retrieve accounts that the current user is
+ * allowed to access.
+ */
 public interface AccountAuthorizationService {
 
     Account getAccessibleAccount(UUID accountId);

@@ -6,6 +6,10 @@ import com.finance.accountservice.transaction.dto.response.TransactionResponse;
 
 import java.util.UUID;
 
+/**
+ * Service interface for transaction business logic. Defines operations
+ * for creating deposits/withdrawals and querying transaction history.
+ */
 public interface TransactionService {
 
     TransactionResponse createTransaction(

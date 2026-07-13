@@ -5,6 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of {@link UserDetailsService} for Spring Security.
+ * Loads user details from the database by username for authentication.
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService

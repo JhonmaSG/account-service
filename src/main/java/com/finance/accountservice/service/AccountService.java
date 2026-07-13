@@ -8,6 +8,10 @@ import com.finance.accountservice.entity.AccountStatus;
 
 import java.util.UUID;
 
+/**
+ * Service interface for account business logic. Defines operations
+ * for creating, querying, updating, and deleting bank accounts.
+ */
 public interface AccountService {
 
     AccountResponse createAccount(CreateAccountRequest request);

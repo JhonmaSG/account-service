@@ -13,6 +13,10 @@ import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
 
+/**
+ * Service for JWT token operations. Handles token generation,
+ * validation, and claim extraction using HMAC-SHA signing.
+ */
 @Service
 public class JwtService {
 

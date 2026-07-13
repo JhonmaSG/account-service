@@ -16,6 +16,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Service for authentication and registration. Handles user login
+ * with JWT token generation and user registration with role assignment.
+ * All authentication events are logged via AuditService.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {

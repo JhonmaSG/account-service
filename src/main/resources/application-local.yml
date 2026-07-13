@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: ${DB_URL}
+    url: ${DB_URL_LOCAL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
   data:
     mongodb:
-      uri: ${MONGO_URI}
+      uri: ${MONGO_URI_LOCAL}
       database: ${MONGO_DB}
 
   jpa:

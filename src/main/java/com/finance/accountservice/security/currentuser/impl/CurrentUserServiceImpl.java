@@ -6,6 +6,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementation of {@link CurrentUserService}. Retrieves the current
+ * username and role from Spring Security's SecurityContextHolder.
+ */
 @Service
 public class CurrentUserServiceImpl implements CurrentUserService {
 

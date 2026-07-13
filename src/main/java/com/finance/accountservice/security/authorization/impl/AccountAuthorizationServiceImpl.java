@@ -15,6 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Implementation of {@link AccountAuthorizationService}. Enforces
+ * ownership-based access: ADMIN sees all accounts, USER sees only
+ * their own accounts.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

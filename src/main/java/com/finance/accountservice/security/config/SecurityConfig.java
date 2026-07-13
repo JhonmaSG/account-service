@@ -17,6 +17,11 @@ import com.finance.accountservice.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Spring Security configuration. Sets up stateless JWT authentication,
+ * password encoding, role-based and endpoint-level security rules,
+ * and registers the JwtAuthenticationFilter.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

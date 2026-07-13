@@ -27,6 +27,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Implementation of {@link TransactionService}. Processes deposits and
+ * withdrawals with balance validation, automatic balance updates, and
+ * audit event logging.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

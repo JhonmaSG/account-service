@@ -28,6 +28,11 @@ import java.util.List;
 import java.util.UUID;
 
 
+/**
+ * Implementation of {@link AccountService}. Handles account CRUD with
+ * ownership validation, automatic account number generation, and
+ * audit event logging.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)

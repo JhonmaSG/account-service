@@ -8,6 +8,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+/**
+ * Service for persisting audit events to MongoDB. Logs user actions
+ * such as login, registration, account creation, and financial
+ * transactions for traceability.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

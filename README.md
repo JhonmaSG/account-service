@@ -10,7 +10,9 @@ Proyecto enfocado en aplicar conceptos de arquitectura backend empresarial utili
 ![MongoDB](https://img.shields.io/badge/MongoDB-7.0-brightgreen)
 ![Docker](https://img.shields.io/badge/Docker-29.2.1-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
-
+![CI](https://github.com/JhonmaSG/account-service/actions/workflows/ci.yml/badge.svg)
+![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=JhonmaSG_account-service&metric=alert_status)
+![Coverage](https://sonarcloud.io/api/project_badges/measure?project=JhonmaSG_account-service&metric=coverage)
 ---
 
 ## Descripción
@@ -40,7 +42,8 @@ Incluye funcionalidades como:
 * Aplicar DTOs y separación de responsabilidades
 * Implementar testing unitario e integración
 * Preparar la evolución hacia microservicios financieros
-
+* Implementar integración continua (CI) con GitHub Actions
+* Analizar calidad de código mediante SonarCloud
 ---
 
 ##  Tecnologías Utilizadas
@@ -59,8 +62,15 @@ Incluye funcionalidades como:
 * **Maven**
 * **Jakarta Validation**
 
+### Calidad de Código
+* **SonarCloud**
+* **JaCoCo**
+* **GitHub Actions CI Pipeline**
+
 ### Infraestructura
 * **Docker**
+* **Docker Compose**
+* **GitHub Actions (CI)**
 
 ### Testing
 * **JUnit 5**
@@ -109,6 +119,24 @@ El proyecto utiliza dos bases de datos con responsabilidades claramente separada
 |---|---|
 | **PostgreSQL** | Datos transaccionales: usuarios, cuentas, transacciones |
 | **MongoDB** | Auditoría de eventos: registro de acciones por usuario |
+
+---
+
+## CI / Continuous Integration
+
+El proyecto cuenta con un pipeline de Integración Continua utilizando GitHub Actions.
+
+El pipeline ejecuta automáticamente:
+
+* Checkout del repositorio
+* Configuración de Java 17
+* Compilación del proyecto con Maven
+* Ejecución de pruebas
+* Verificación del proyecto (`mvn verify`)
+* Generación del reporte de cobertura con JaCoCo
+* Análisis estático de código mediante SonarCloud
+
+Este proceso garantiza que cada cambio enviado al repositorio sea validado automáticamente antes de su integración.
 
 ---
 
@@ -170,20 +198,3 @@ El proyecto utiliza dos bases de datos con responsabilidades claramente separada
 |                  | GET `/audit/logs/action/{action}` | Logs de auditoría por tipo de acción     | Solo **ADMIN**                                                                      |
 
 ---
-
-## Estado Actual del Proyecto
-
-| Módulo | Estado |
-|---|---|
-| JWT Authentication |  Estable |
-| Role-Based Authorization |  Estable |
-| Ownership Authorization |  Estable |
-| CRUD de cuentas |  Estable |
-| Gestión de transacciones |  Estable |
-| DTO Mapping con MapStruct |  Estable |
-| Exception Handling |  Estable |
-| Pagination |  Estable |
-| Integration Testing |  Estable |
-| Auditoría con MongoDB |  Estable |
-| Docker |  Estable |
-| Docker Compose |  Estable |
